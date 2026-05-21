@@ -7,7 +7,11 @@ import {
 import { auth, isFirebaseConfigured } from '../firebase';
 import { LogIn, UserPlus, Key, Mail, Lock, ShieldAlert, CheckCircle, Info } from 'lucide-react';
 
-export default function AuthScreen() {
+interface AuthScreenProps {
+  onGuestLogin?: () => void;
+}
+
+export default function AuthScreen({ onGuestLogin }: AuthScreenProps = {}) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -80,17 +84,26 @@ export default function AuthScreen() {
           
           {/* Environment warning notice if env values are missing */}
           {!isFirebaseConfigured && (
-            <div className="p-4 bg-amber-50 border border-amber-201 border-amber-200 rounded-2xl flex gap-2.5 items-start">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex gap-2.5 items-start">
               <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <div className="text-[11px] text-amber-800 leading-relaxed">
+              <div className="text-[11px] text-amber-850 text-amber-805 text-amber-800 leading-relaxed w-full">
                 <strong className="block font-bold mb-1">⚠️ 暂未配置 Firebase 密钥</strong>
-                由于未检测到 Firebase 环境变量，此程序当前无法执行正常登录与云端存储操作。请登入 AI Studio 的 <b>Settings</b> 面板，依其次配置并赋予以下变量：
+                由于未检测到 Firebase 环境变量，此程序当前无法执行正常登录与云端存储操作。请登入 AI Studio 的 <b>Settings</b> 面板，依其次配置并配置以下变量：
                 <ul className="list-disc pl-4 mt-1.5 font-mono text-[10px] space-y-0.5 text-amber-700 select-all">
                   <li>VITE_FIREBASE_API_KEY</li>
                   <li>VITE_FIREBASE_AUTH_DOMAIN</li>
                   <li>VITE_FIREBASE_PROJECT_ID</li>
                   <li>VITE_FIREBASE_APP_ID</li>
                 </ul>
+                {onGuestLogin && (
+                  <button
+                    type="button"
+                    onClick={onGuestLogin}
+                    className="mt-3.5 w-full py-2 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white text-[11px] font-bold rounded-xl transition-all cursor-pointer text-center block shadow-sm"
+                  >
+                    🚀 以本地游客模式试用 (免配置、免注册直接体验)
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -195,6 +208,24 @@ export default function AuthScreen() {
               )}
             </button>
           </form>
+
+          {onGuestLogin && (
+            <>
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-slate-150"></div>
+                <span className="flex-shrink mx-4 text-slate-350 text-[9px] font-extrabold uppercase font-mono tracking-wider">或者 / OR</span>
+                <div className="flex-grow border-t border-slate-150"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onGuestLogin}
+                className="w-full py-2.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold rounded-2xl text-xs transition-all cursor-pointer select-none flex items-center justify-center gap-1 shadow-3xs"
+              >
+                <span>✨ 游客模式免登录试用 (本地数据版)</span>
+              </button>
+            </>
+          )}
 
           {/* Quick Sandbox test tips with simulated values */}
           <div className="p-3.5 bg-slate-50 border border-slate-200/60 rounded-2xl flex gap-2 items-start text-[10px] text-slate-500">

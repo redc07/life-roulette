@@ -21,10 +21,17 @@ export default function App() {
   // Authentication state trackers
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState<boolean>(() => {
+    return localStorage.getItem('habit_wheel_guest_mode') === 'true';
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      if (user) {
+        setIsGuest(false);
+        localStorage.removeItem('habit_wheel_guest_mode');
+      }
       setAuthLoading(false);
     });
     return () => unsubscribe();
@@ -260,8 +267,8 @@ export default function App() {
     );
   }
 
-  if (!currentUser) {
-    return <AuthScreen />;
+  if (!currentUser && !isGuest) {
+    return <AuthScreen onGuestLogin={() => { setIsGuest(true); localStorage.setItem('habit_wheel_guest_mode', 'true'); }} />;
   }
 
   return (
@@ -336,14 +343,21 @@ export default function App() {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">CURRENT SESSION</span>
-              <span className="text-xs font-bold text-slate-700 truncate max-w-[150px]" title={currentUser?.email || ""}>
-                {currentUser?.email}
+              <span className="text-xs font-bold text-slate-700 truncate max-w-[150px]" title={isGuest ? "本地离线游客" : (currentUser?.email || "")}>
+                {isGuest ? "本地游客 (离线体验)" : currentUser?.email}
               </span>
             </div>
             <button
-              onClick={() => signOut(auth)}
-              className="ml-2 hover:bg-rose-50 hover:text-rose-600 group p-2 text-slate-405 text-slate-400 rounded-xl transition-all cursor-pointer flex items-center justify-center"
-              title="安全退出账户登录"
+              onClick={() => {
+                if (isGuest) {
+                  setIsGuest(false);
+                  localStorage.removeItem('habit_wheel_guest_mode');
+                } else {
+                  signOut(auth);
+                }
+              }}
+              className="ml-2 hover:bg-rose-50 hover:text-rose-600 group p-2 text-slate-400 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+              title={isGuest ? "安全退出游客模式" : "安全退出账户登录"}
             >
               <LogOut className="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors" />
             </button>

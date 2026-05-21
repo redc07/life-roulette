@@ -61,11 +61,31 @@ export default function CloudHistory() {
     return () => unsubscribe();
   }, [auth.currentUser]);
 
+  const isGuestModeActive = localStorage.getItem('habit_wheel_guest_mode') === 'true';
+
   if (!isFirebaseConfigured) {
     return (
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center text-xs text-slate-400">
-        <Layers className="w-8 h-8 text-slate-350 mx-auto mb-2" />
-        <span>请先配置宿主环境变量以启用云端轨迹同步面板</span>
+      <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center text-xs text-slate-500 max-w-4xl mx-auto space-y-3">
+        <Layers className="w-8 h-8 text-indigo-500 mx-auto animate-pulse" />
+        <h4 className="text-sm font-bold text-slate-800">🌐 离线模式提示 / 云端结算轨迹未挂载</h4>
+        <p className="text-slate-400 max-w-xl mx-auto leading-relaxed">
+          您当前正在使用 <b>本地免登录游客状态</b>。由于未检测到宿主的 Firebase 相关环境变量，程序会自动采用本地存储形式运作。
+        </p>
+        <p className="text-[11px] text-slate-400">
+          如需启用真实的多端实时云账户对齐、每日历史足迹追查等高级特性，请在 <b>AI Studio Settings</b> 里配置配置相应的 VITE_FIREBASE_* 变量。
+        </p>
+      </div>
+    );
+  }
+
+  if (isGuestModeActive && !auth.currentUser) {
+    return (
+      <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center text-xs text-slate-500 max-w-4xl mx-auto space-y-3">
+        <Layers className="w-8 h-8 text-indigo-600 mx-auto" />
+        <h4 className="text-sm font-bold text-slate-800">💡 正在使用游客离线模式</h4>
+        <p className="text-slate-400 max-w-xl mx-auto leading-relaxed">
+          本地免登录游客状态下将不会同步到云端数据库。可在顶部点击 <b>退出游客模式</b> 并使用您的邮箱注册/登录帐户，即可开启 Firestore 实时追踪轨迹与近7天报表结算面板。
+        </p>
       </div>
     );
   }
