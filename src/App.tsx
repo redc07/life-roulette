@@ -9,9 +9,27 @@ import { DEFAULT_LIBRARY } from './data';
 import SpinnerWheel from './components/SpinnerWheel';
 import EventList from './components/EventList';
 import ScoreBoard from './components/ScoreBoard';
-import { Compass, Clock, Calendar, Sparkles, HelpCircle } from 'lucide-react';
+import { Compass, Clock, Calendar, Sparkles, HelpCircle, LogOut, User as UserIcon } from 'lucide-react';
+
+// Firebase Authentication & Custom Cloud Logging Integrations
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { auth, addSpinRecord, isFirebaseConfigured } from './firebase';
+import AuthScreen from './components/AuthScreen';
+import CloudHistory from './components/CloudHistory';
 
 export default function App() {
+  // Authentication state trackers
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // 1. Habit Registry list
   const [registryEvents, setRegistryEvents] = useState<HabitEvent[]>(() => {
     try {
@@ -160,6 +178,12 @@ export default function App() {
 
     setCurrentPoints(nextPoints);
 
+    // Cloud record synchronization
+    if (currentUser?.uid) {
+      addSpinRecord(currentUser.uid, winningEvent.name, pointsDelta, nextPoints)
+        .catch(err => console.error("Cloud storage sync aborted:", err));
+    }
+
     // Append history ledger record
     const newLog: SpinLog = {
       id: Math.random().toString(36).substr(2, 9),
@@ -227,6 +251,19 @@ export default function App() {
     setLogs([]);
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center font-sans antialiased">
+        <div className="w-8 h-8 border-2 border-indigo-650 border-t-transparent rounded-full animate-spin"></div>
+        <span className="text-xs text-slate-400 font-bold mt-3 animate-pulse">正在对齐云端身份令牌中...</span>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <AuthScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 py-8 px-4 sm:px-6 lg:px-8 font-sans antialiased">
       
@@ -251,7 +288,7 @@ export default function App() {
             </div>
 
             <p className="text-xs text-slate-500 leading-relaxed mb-6">
-              该习惯已被确立为<b>本轮时空主角</b>，并已同步载入右下方的主角事件执行清单。当前结算积分已按照各占格之重比完成并轨清算。
+              该习惯已被确立为<b>本轮时空主角</b>，并已同步载入右下方的执行清单。当前结算积分已按照各占格之重比完成并轨清算。
             </p>
 
             <div className="w-full p-4 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-between mb-6 font-mono text-xs">
@@ -279,8 +316,8 @@ export default function App() {
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Simplified professional head title layout */}
-        <header className="pb-6 border-b border-slate-205 border-slate-200">
-          <div>
+        <header className="pb-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex-1">
             <div className="flex items-center gap-1.5 mb-1.5">
               <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded text-[10px] font-bold font-mono text-indigo-600 uppercase">
                 Hybrid Decision Matrix
@@ -291,6 +328,25 @@ export default function App() {
             <p className="text-xs text-slate-500 mt-1">
               生活是各因果概率发生期望的总和，而非单次幸运的偶成。<b>习惯仓库</b>负责日常权重分值绑定；而<b>命运转盘</b>则每天只需自由拽入行为增减<b>占格</b>调整发生比重，便可完成秒级结算。
             </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 bg-white border border-slate-200 p-2.5 px-3.5 rounded-2xl shrink-0 self-start md:self-center shadow-3xs select-none">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+              <UserIcon className="w-4 h-4 text-indigo-550" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[9px] text-slate-400 font-extrabold uppercase font-mono tracking-wider">CURRENT SESSION</span>
+              <span className="text-xs font-bold text-slate-700 truncate max-w-[150px]" title={currentUser?.email || ""}>
+                {currentUser?.email}
+              </span>
+            </div>
+            <button
+              onClick={() => signOut(auth)}
+              className="ml-2 hover:bg-rose-50 hover:text-rose-600 group p-2 text-slate-405 text-slate-400 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+              title="安全退出账户登录"
+            >
+              <LogOut className="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors" />
+            </button>
           </div>
         </header>
 
@@ -326,6 +382,9 @@ export default function App() {
           onWeeklyReset={handleWeeklyReset}
           onClearHistory={handleClearHistory}
         />
+
+        {/* Real-time Cloud History Records Tracking */}
+        <CloudHistory />
 
       </div>
     </div>

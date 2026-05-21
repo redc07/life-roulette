@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Rule 1: Catch-all block default denies every request
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidSpin(data) {
+      // Invariant checks on structure and size
+      return data.hitEvent is string 
+        && data.hitEvent.size() <= 200
+        && data.change is number
+        && data.dailyTotal is number;
+    }
+
+    // users/{userId}/spins/{spinId} collection
+    match /users/{userId}/spins/{spinId} {
+      allow create: if isOwner(userId) 
+        && isValidId(spinId) 
+        && isValidSpin(request.resource.data);
+        
+      allow get, list: if isOwner(userId);
+    }
+  }
+}

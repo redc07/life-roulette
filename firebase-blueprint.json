@@ -1,0 +1,34 @@
+{
+  "entities": {
+    "Spin": {
+      "title": "Spin",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The atomic time of the wheel spin"
+        },
+        "hitEvent": {
+          "type": "string",
+          "description": "The dynamic human name of the habit item drawn"
+        },
+        "change": {
+          "type": "number",
+          "description": "The positive or negative point delta resulted from expected value matrix"
+        },
+        "dailyTotal": {
+          "type": "number",
+          "description": "The user total point balance after the spin transaction"
+        }
+      },
+      "required": ["timestamp", "hitEvent", "change", "dailyTotal"]
+    }
+  },
+  "firestore": {
+    "users/{userId}/spins/{spinId}": {
+      "schema": "Spin",
+      "description": "Historical spin logs for each authenticated user"
+    }
+  }
+}

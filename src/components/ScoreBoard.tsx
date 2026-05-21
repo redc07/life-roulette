@@ -83,7 +83,7 @@ export default function ScoreBoard({
   const triggerRecords = () => {
     setConfirmDialog({
       type: 'records',
-      title: '🎯 确认清空今日主角事件清单吗？',
+      title: '🎯 确认清空执行清单吗？',
       message: '本操作将彻底清空列表中已抽取并记录的命运主角执行待办明细。'
     });
   };
@@ -244,7 +244,7 @@ export default function ScoreBoard({
           <div className="flex items-center gap-2">
             <CheckSquare className="w-5 h-5 text-indigo-600" />
             <div>
-              <h4 className="text-sm font-bold text-gray-800">🎯 命中的主角事件执行清单</h4>
+              <h4 className="text-sm font-bold text-gray-800">🎯 执行清单</h4>
               <p className="text-[10px] text-slate-400 mt-0.5">记录转盘抽中的大戏主角，监督并落实执行情况</p>
             </div>
           </div>
@@ -277,8 +277,14 @@ export default function ScoreBoard({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
-            {protagonistRecords.map((rec) => {
-              const isPositive = rec.type === 'positive';
+            {[...protagonistRecords]
+              .sort((a, b) => {
+                if (a.completed && !b.completed) return 1;
+                if (!a.completed && b.completed) return -1;
+                return 0;
+              })
+              .map((rec) => {
+                const isPositive = rec.type === 'positive';
               return (
                 <div
                   key={rec.id}
