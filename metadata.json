@@ -1,0 +1,6 @@
+{
+  "name": "转盘习惯结算游戏",
+  "description": "基于真实权重分配与每日/每周积分结算的习惯重组转盘游戏，让不确定性的选择映射习惯期望值。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
