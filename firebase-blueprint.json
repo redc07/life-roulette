@@ -29,6 +29,9 @@
     "users/{userId}/spins/{spinId}": {
       "schema": "Spin",
       "description": "Historical spin logs for each authenticated user"
+    },
+    "users/{userId}/userData/{documentId}": {
+      "description": "Synced layout states - lists, points, logs, presets and checklist items for dynamic cross-device reload"
     }
   }
 }

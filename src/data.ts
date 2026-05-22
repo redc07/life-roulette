@@ -1,4 +1,5 @@
 import { HabitEvent } from './types';
+import { getHabitColor } from './utils';
 
 export const DEFAULT_LIBRARY: HabitEvent[] = [
   {
@@ -6,7 +7,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '早睡早起',
     type: 'positive',
     value: 5,
-    color: '#6366f1', // Indigo
+    color: getHabitColor(5),
     emoji: '🌅',
   },
   {
@@ -14,7 +15,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: 'AI写作',
     type: 'positive',
     value: 5,
-    color: '#0ea5e9', // Sky
+    color: getHabitColor(5),
     emoji: '✍️',
   },
   {
@@ -22,7 +23,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '建模学习',
     type: 'positive',
     value: 5,
-    color: '#06b6d4', // Cyan
+    color: getHabitColor(5),
     emoji: '📐',
   },
   {
@@ -30,7 +31,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: 'unity学习',
     type: 'positive',
     value: 3,
-    color: '#8b5cf6', // Violet
+    color: getHabitColor(3),
     emoji: '🎮',
   },
   {
@@ -38,7 +39,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '跑步',
     type: 'positive',
     value: 2,
-    color: '#10b981', // Emerald
+    color: getHabitColor(2),
     emoji: '🏃',
   },
   {
@@ -46,7 +47,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '涂药',
     type: 'positive',
     value: 1,
-    color: '#14b8a6', // Teal
+    color: getHabitColor(1),
     emoji: '💊',
   },
   {
@@ -54,7 +55,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '冥想',
     type: 'positive',
     value: 1,
-    color: '#ec4899', // Pink
+    color: getHabitColor(1),
     emoji: '🧘',
   },
   {
@@ -62,7 +63,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '麻将2半庄',
     type: 'negative',
     value: -1,
-    color: '#f59e0b', // Amber
+    color: getHabitColor(-1),
     emoji: '🀄',
   },
   {
@@ -70,7 +71,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '100元',
     type: 'negative',
     value: -1,
-    color: '#f97316', // Orange
+    color: getHabitColor(-1),
     emoji: '💵',
   },
   {
@@ -78,7 +79,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '游戏2小时',
     type: 'negative',
     value: -1,
-    color: '#ef4444', // Red
+    color: getHabitColor(-1),
     emoji: '🎮',
   },
   {
@@ -86,7 +87,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '针线活',
     type: 'negative',
     value: -5,
-    color: '#f43f5e', // Rose
+    color: getHabitColor(-5),
     emoji: '🪡',
   },
   {
@@ -94,7 +95,7 @@ export const DEFAULT_LIBRARY: HabitEvent[] = [
     name: '430元',
     type: 'negative',
     value: -10,
-    color: '#991b1b', // Dark red
+    color: getHabitColor(-10),
     emoji: '💰',
   }
 ];

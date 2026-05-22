@@ -35,5 +35,10 @@ service cloud.firestore {
         
       allow get, list: if isOwner(userId);
     }
+
+    // users/{userId}/userData/{documentId} collection
+    match /users/{userId}/userData/{documentId} {
+      allow read, write: if isOwner(userId);
+    }
   }
 }

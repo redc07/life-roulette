@@ -68,15 +68,15 @@ export default function ScoreBoard({
     setConfirmDialog({
       type: 'weekly',
       title: '📅 确认进行周清归零结算吗？',
-      message: '本操作将把您的实时生存积分彻底归零重置。'
+      message: '本操作将把您的实时习惯积分彻底归零重置。'
     });
   };
 
   const triggerHistory = () => {
     setConfirmDialog({
       type: 'history',
-      title: '📜 确认清除所有综合账单历史吗？',
-      message: '本操作将永久擦除底部「命运轨迹 Ledger Logs」的所有明细结算记录。本项修改不可撤销。'
+      title: '📜 确认清空转盘结算明细账本吗？',
+      message: '本操作将永久抹除「转盘结算明细账本」中记录的全部转轮旋转与积分结算明细记录。此项清除操作不可撤销。'
     });
   };
 
@@ -84,7 +84,7 @@ export default function ScoreBoard({
     setConfirmDialog({
       type: 'records',
       title: '🎯 确认清空执行清单吗？',
-      message: '本操作将彻底清空列表中已抽取并记录的命运主角执行待办明细。'
+      message: '本操作将彻底清空列表中已抽取并记录的中签习惯执行待办。'
     });
   };
 
@@ -132,12 +132,12 @@ export default function ScoreBoard({
       {isAdjustingPoints && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white max-w-sm w-full rounded-3xl p-6 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <h5 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-indigo-500 shrink-0" />
-              <span>🔧 手动修正生存积分</span>
+            <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+              <Clock className="w-5 h-5 text-indigo-505 text-indigo-500 shrink-0" />
+              <span>🔧 手动修正习惯积分</span>
             </h5>
             <p className="text-xs text-slate-500 leading-relaxed mb-4">
-              手动调整当前的实时生存积分。输入一个您期望的目标分值（支持任意大于0的整数，系统将继承账目继续演算）：
+              手动调整当前的实时习惯积分。输入一个您期望的目标分值（支持任意大于0的整数，系统将继承账目继续运算）：
             </p>
             
             <div className="mb-6">
@@ -186,17 +186,17 @@ export default function ScoreBoard({
               <Award className="w-3.5 h-3.5 text-amber-500" />
               <span>当前累计积分账本</span>
             </div>
-            <h4 className="text-sm font-semibold text-gray-400 mt-2">实时生存积分</h4>
+            <h4 className="text-sm font-semibold text-gray-400 mt-2">实时习惯积分</h4>
             <div className="flex items-baseline gap-2 mt-1">
               <span className={`text-5xl font-extrabold font-mono tracking-tight ${
-                currentPoints > 100 ? 'text-emerald-600' : currentPoints < 100 ? 'text-rose-500' : 'text-slate-800'
+                currentPoints > 0 ? 'text-emerald-600' : currentPoints < 0 ? 'text-rose-500' : 'text-slate-800'
               }`}>
                 {currentPoints}
               </span>
               <span className="text-xs text-gray-400 font-bold">分</span>
             </div>
             <p className="text-xs text-slate-500 mt-2 leading-relaxed max-w-md">
-              初始动能 100。指针指向的对象标志本轮“命运主角”，但无论主角是谁，本轮账目全员并轨协同结算。
+              初始动能为 0 分。指针指向的对象标志本轮“中签习惯”，但无论中签哪项，本轮账目全员按转盘概率整体加权结算。
             </p>
           </div>
 
@@ -227,13 +227,6 @@ export default function ScoreBoard({
                 <span className="text-xs font-semibold">归零结算</span>
               </button>
             </div>
-
-            <button
-              onClick={triggerHistory}
-              className="py-1.5 px-3 text-center self-end text-[10px] text-slate-400 font-mono hover:text-rose-600 hover:underline transition-colors cursor-pointer"
-            >
-              清除历史转动足迹/账单
-            </button>
           </div>
         </div>
       </div>
@@ -245,7 +238,7 @@ export default function ScoreBoard({
             <CheckSquare className="w-5 h-5 text-indigo-600" />
             <div>
               <h4 className="text-sm font-bold text-gray-800">🎯 执行清单</h4>
-              <p className="text-[10px] text-slate-400 mt-0.5">记录转盘抽中的大戏主角，监督并落实执行情况</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">记录转盘抽中的执行事件，监督并落实执行情况</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -270,9 +263,9 @@ export default function ScoreBoard({
         {totalRecords === 0 ? (
           <div className="text-center py-12 text-slate-400 text-xs">
             <Sparkles className="w-8 h-8 text-indigo-300 mx-auto mb-2 animate-pulse" />
-            <span className="block font-semibold text-slate-500">尚无标记的主角任务</span>
+            <span className="block font-semibold text-slate-500">尚无待执行习惯任务</span>
             <p className="text-[10px] text-slate-400 max-w-sm mx-auto mt-1 leading-normal">
-              开始摇晃指针！转盘最终指中的“主角习惯”，会自动作为当班的主命寄事件载入本区。默认“未完成”，完成后可直接勾选勾销。
+              开始旋转转盘！转盘最终指中的“中签习惯”，会自动作为当期执行的习惯载入本区。默认“未完成”，完成后可直接勾选完成。
             </p>
           </div>
         ) : (
@@ -326,22 +319,40 @@ export default function ScoreBoard({
 
       {/* 3. Detailed Math Logs (命运轨迹 Ledger Logs - Accordion fold) */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <button
-          onClick={() => setIsLogsExpanded(!isLogsExpanded)}
-          className="w-full flex items-center justify-between p-5 bg-white hover:bg-slate-50/50 transition-colors text-left focus:outline-none"
-        >
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white border-b border-slate-100 gap-4">
+          <button
+            onClick={() => setIsLogsExpanded(!isLogsExpanded)}
+            className="flex items-center gap-2 text-left focus:outline-none hover:opacity-85 transition-opacity"
+          >
             <BookOpen className="w-4.5 h-4.5 text-slate-500" />
             <div>
-              <h4 className="text-sm font-bold text-gray-700">📜 命运并轨明细账本</h4>
-              <p className="text-[10px] text-gray-400 mt-0.5">查看历次命运指针偏转、账本结算的详细算式记录</p>
+              <h4 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                <span>📜 转盘结算明细账本</span>
+                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isLogsExpanded ? 'rotate-180' : ''}`} />
+              </h4>
+              <p className="text-[10px] text-slate-400 mt-0.5">查看历次转盘转动、账本期望加权计算的详细流水账目</p>
             </div>
+          </button>
+          
+          <div className="flex items-center gap-2.5 sm:self-center">
+            {logs.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerHistory();
+                }}
+                className="py-1 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-100 font-bold text-[10px] text-rose-600 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+                title="清空整本明细账单"
+              >
+                <Trash2 className="w-3 h-3" />
+                <span>清空转盘结算明细账本</span>
+              </button>
+            )}
           </div>
-          <ChevronDown className={`w-4.5 h-4.5 text-slate-400 transition-transform ${isLogsExpanded ? 'rotate-180' : ''}`} />
-        </button>
+        </div>
 
         {isLogsExpanded && (
-          <div className="p-5 pt-0 border-t border-slate-100 bg-slate-50/30">
+          <div className="p-5 pt-4 bg-slate-50/30">
             {logs.length === 0 ? (
               <div className="text-center py-10 text-slate-400 text-xs font-sans">
                 <Info className="w-6 h-6 text-slate-300 mx-auto mb-1" />
@@ -409,7 +420,7 @@ export default function ScoreBoard({
                           {/* Main protagonist notice */}
                           <div className="p-2 rounded bg-orange-50/50 border border-orange-100 text-[10px] text-orange-950 flex justify-between gap-1">
                             <span>
-                              👑 本轮主角：<strong className="text-orange-900">「{log.protagonistEventName}」</strong>
+                              👑 本轮中签习惯：<strong className="text-orange-900">「{log.protagonistEventName}」</strong>
                             </span>
                             <span className="font-mono text-slate-400">占比 {log.eventBreakdown?.find((eb) => eb.name === log.protagonistEventName)?.weight || 0}%</span>
                           </div>

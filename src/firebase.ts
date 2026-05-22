@@ -2,7 +2,7 @@
 
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, Timestamp } from 'firebase/firestore';
 
 const hasRealConfig = !!(
   import.meta.env.VITE_FIREBASE_API_KEY &&
@@ -101,6 +101,56 @@ export async function addSpinRecord(uid: string, hitEvent: string, change: numbe
     console.log("Write success to Firestore path:", path, newRecord);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+/**
+ * Safely saves the user's complete layout configuration and state in Firestore.
+ */
+export async function saveUserState(
+  uid: string,
+  state: {
+    registryEvents: any[];
+    wheelItems: any[];
+    currentPoints: number;
+    logs: any[];
+    protagonistRecords: any[];
+  }
+) {
+  if (!isFirebaseConfigured) return;
+  const path = `users/${uid}/userData/config`;
+  try {
+    const docRef = doc(db, 'users', uid, 'userData', 'config');
+    await setDoc(docRef, {
+      registryEvents: state.registryEvents,
+      wheelItems: state.wheelItems,
+      currentPoints: state.currentPoints,
+      logs: state.logs,
+      protagonistRecords: state.protagonistRecords,
+      updatedAt: Timestamp.now()
+    });
+    console.log("Successfully saved user state to Cloud:", path);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+/**
+ * Safely loads the user's complete layout configuration and state from Firestore.
+ */
+export async function getUserState(uid: string) {
+  if (!isFirebaseConfigured) return null;
+  const path = `users/${uid}/userData/config`;
+  try {
+    const docRef = doc(db, 'users', uid, 'userData', 'config');
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+    return null;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.GET, path);
+    return null;
   }
 }
 

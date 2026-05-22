@@ -75,7 +75,7 @@ export default function AuthScreen({ onGuestLogin }: AuthScreenProps = {}) {
           转盘习惯自主结算系统
         </h1>
         <p className="mt-1.5 text-center text-xs text-slate-500 max-w-sm mx-auto">
-          建立在因果概率模型上的习惯与限令管理台，登录您的账户以开始同步多端记录
+          一款科学调控概率比例的习惯管理应用，登录您的账户以开始同步多端记录
         </p>
       </div>
 

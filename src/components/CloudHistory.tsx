@@ -174,12 +174,12 @@ export default function CloudHistory() {
           <div className="space-y-3">
             <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
-              <span>今日云端命运记录 ({todayRecords.length} 次)</span>
+              <span>今日云端转盘记录 ({todayRecords.length} 次)</span>
             </h5>
 
             {todayRecords.length === 0 ? (
               <div className="p-8 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center text-xs text-slate-400">
-                今日您还没有启动任何命运偏转。点击上方开始命运摆轮，抽取的主角和清算金额将瞬间写入。
+                今日您还没有启动任何转盘转动。点击上方开始转动转盘，抽取出来的习惯和对应的结算积分将瞬间写入。
               </div>
             ) : (
               <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">

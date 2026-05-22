@@ -261,21 +261,21 @@ export default function SpinnerWheel({
               <Compass className="w-3.5 h-3.5 animate-spin-slow text-indigo-500" />
               <span>DECISION MATRIX WHEEL PLATFORM</span>
             </div>
-            {/* Title modified from "命运惯性摆盘" to "今日转盘" */}
+            {/* Title modified for standard plain Chinese term */}
             <h3 className="text-xl font-extrabold text-slate-800 tracking-tight">今日转盘</h3>
             <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-              指针落定的部分不仅是叙事主演，所有的格数组合也会相互共振。每天通过拖拽左侧习惯，调整本轮占格数，以便重组您的命运平均值结算！
+              指针落下的部分代表当期执行的习惯。每天通过在各操作区调整占格，能够直接微调今天转盘的收益期望，从而促进习惯的长期养成。
             </p>
           </div>
 
           {/* Settle info & state summaries */}
           <div className="grid grid-cols-2 gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs">
             <div className="flex flex-col">
-              <span className="text-[10px] text-slate-400 font-bold block">当前动能分数</span>
+              <span className="text-[10px] text-slate-400 font-bold block">当前习惯积分</span>
               <strong className="text-lg font-black font-mono text-slate-800 mt-0.5">{currentPoints} <span className="text-[10px] text-slate-400 font-normal">分</span></strong>
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] text-indigo-600/80 font-bold block">当次并轨期望分值</span>
+              <span className="text-[10px] text-indigo-600/80 font-bold block">平均结算期望分值</span>
               <strong className="text-lg font-black font-mono text-indigo-600 mt-0.5">
                 {events.length === 0 ? '0.00' : `${expectedValue.toFixed(2)}`} <span className="text-[10px] text-indigo-400 font-normal">分/轮</span>
               </strong>
@@ -302,12 +302,12 @@ export default function SpinnerWheel({
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  转轮能量摩擦中... ({Math.floor(Math.random() * 20) + 70}ms)
+                  习惯概率匹配计算中... ({Math.floor(Math.random() * 20) + 70}ms)
                 </span>
               ) : (
                 <span className="flex items-center gap-2 text-white">
                   <Sparkles className="w-4 h-4 text-amber-200 fill-amber-300" />
-                  开始命运摆轮 (抽 1~100)
+                  开始旋转转盘 (抽 1~100)
                 </span>
               )}
             </button>
@@ -316,14 +316,14 @@ export default function SpinnerWheel({
             {!isValid && events.length > 0 && (
               <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[10.5px] flex gap-1.5 items-start mt-1">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <span>命运必须占满100格，且正负项格数各自不超过80，请在下面左侧事件区域微调！</span>
+                <span>配置总数必须占满100格，且正负项格数各自不超过80，请在下方配置区域进行微调！</span>
               </div>
             )}
             {isValid && !isExpectedPositive && events.length > 0 && (
               <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[10.5px] flex gap-1.5 items-start mt-1 select-text">
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5 animate-pulse" />
                 <span className="leading-snug">
-                  <b>⚠️ 结算风险过重警告：</b>并轨清算后的下届分数将沦为负分（当前 {currentPoints} + 结算期望 {expectedValue.toFixed(2)} = {(currentPoints + expectedValue).toFixed(2)}分）。无法继续正常承载，请微调减少负向习惯占格，或先进行分数手动修正！
+                  <b>⚠️ 期望负分预警：</b>本次概率结算后的预计分值将沦为负分（当前 {currentPoints} + 结算期望 {expectedValue.toFixed(2)} = {(currentPoints + expectedValue).toFixed(2)}分）。建议微调减少负向限令项目，或者手动修改积分进行修正！
                 </span>
               </div>
             )}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HabitEvent, ActiveWheelItem } from '../types';
 import { PALETTE } from '../data';
+import { getHabitColor } from '../utils';
 import {
   Plus,
   Trash2,
@@ -40,9 +41,14 @@ export default function EventList({
   // New Event Form States
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState('');
-  const [newColor, setNewColor] = useState(PALETTE[Math.floor(Math.random() * PALETTE.length)]);
   const [newType, setNewType] = useState<'positive' | 'negative'>('positive');
   const [newWeightValue, setNewWeightValue] = useState<number>(3); // UI name: "权重" (replaces baseline score/value)
+
+  // Calculate new color automatically based on newly entered properties
+  const signedValue = newType === 'positive' 
+    ? Math.abs(newWeightValue || 3) 
+    : -Math.abs(newWeightValue || 3);
+  const calculatedColor = getHabitColor(signedValue);
 
   // Tab switching state
   const [registryTab, setRegistryTab] = useState<'all' | 'positive' | 'negative'>('all');
@@ -58,6 +64,7 @@ export default function EventList({
   const [batchInputText, setBatchInputText] = useState('');
   const [batchImportError, setBatchImportError] = useState('');
   const [batchImportSuccess, setBatchImportSuccess] = useState('');
+  const [clearExistingOnImport, setClearExistingOnImport] = useState(false);
 
   // Drag-and-drop support state
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -77,11 +84,10 @@ export default function EventList({
     e.preventDefault();
     if (!newName.trim()) return;
 
-    // Use selected newColor or fallback
-    const finalColor = newColor || PALETTE[Math.floor(Math.random() * PALETTE.length)];
     const signedValue = newType === 'positive' 
       ? Math.abs(newWeightValue || 3) 
       : -Math.abs(newWeightValue || 3);
+    const finalColor = getHabitColor(signedValue);
 
     const defaultEmojis = ['🎯', '💡', '🔥', '📚', '🌟', '🍀', '🚀', '🔑', '🌈', '🍿', '⚡', '☕'];
     const finalEmoji = newEmoji.trim() || defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)];
@@ -99,7 +105,6 @@ export default function EventList({
     setNewName('');
     setNewEmoji('');
     setNewWeightValue(3);
-    setNewColor(PALETTE[Math.floor(Math.random() * PALETTE.length)]); // Randomize color for next habit entry
   };
 
   // Trigger editing a specific habit event
@@ -177,7 +182,7 @@ export default function EventList({
 
       const isPositive = score >= 0;
       const type = isPositive ? 'positive' : 'negative';
-      const randomColor = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+      const derivedColor = getHabitColor(score);
 
       const batchEmojis = ['🍀', '⭐', '⚡', '🍿', '💡', '🔥', '📚', '🎯', '🚀', '☕'];
       const matchedEmoji = batchEmojis[i % batchEmojis.length];
@@ -187,7 +192,7 @@ export default function EventList({
         name: name,
         type: type,
         value: score,
-        color: randomColor,
+        color: derivedColor,
         emoji: matchedEmoji,
       };
 
@@ -200,8 +205,14 @@ export default function EventList({
       return;
     }
 
-    onRegistryChange([...registryEvents, ...importedEvents]);
-    setBatchImportSuccess(`成功追加 ${successCount} 项习惯到您的分值仓库内！`);
+    if (clearExistingOnImport) {
+      onRegistryChange(importedEvents);
+      onWheelItemsChange([]);
+      setBatchImportSuccess(`已清空原有事件，并成功导入 ${successCount} 项新习惯！`);
+    } else {
+      onRegistryChange([...registryEvents, ...importedEvents]);
+      setBatchImportSuccess(`成功追加 ${successCount} 项习惯到您的分值仓库内！`);
+    }
     setBatchInputText('');
 
     setTimeout(() => {
@@ -211,9 +222,11 @@ export default function EventList({
   };
 
   // Delete event from Registry
-  const handleDeleteFromRegistry = (id: string) => {
-    onRegistryChange(registryEvents.filter((e) => e.id !== id));
-    onWheelItemsChange(wheelItems.filter((wi) => wi.eventId !== id));
+  const handleDeleteFromRegistry = (id: string, name: string) => {
+    if (window.confirm(`确认把习惯「${name}」从您的分值仓库（事件库）中永久删除吗？\n此操作也会将其从当前生命转盘中一并移除。`)) {
+      onRegistryChange(registryEvents.filter((e) => e.id !== id));
+      onWheelItemsChange(wheelItems.filter((wi) => wi.eventId !== id));
+    }
   };
 
   // Add Item to active wheel configuration (right)
@@ -385,7 +398,7 @@ export default function EventList({
         const currentAbs = Math.abs(item.value);
         const nextAbs = Math.max(1, currentAbs + amount); // cannot drop below absolute 1
         const nextSigned = item.type === 'positive' ? nextAbs : -nextAbs;
-        return { ...item, value: nextSigned };
+        return { ...item, value: nextSigned, color: getHabitColor(nextSigned) };
       }
       return item;
     });
@@ -395,7 +408,7 @@ export default function EventList({
     const updatedWheel = wheelItems.map((wi) => {
       const matchedReg = updated.find((r) => r.id === wi.eventId);
       if (wi.eventId === id && matchedReg) {
-        return { ...wi, value: matchedReg.value };
+        return { ...wi, value: matchedReg.value, color: matchedReg.color };
       }
       return wi;
     });
@@ -427,7 +440,7 @@ export default function EventList({
           <div>
             <span className="font-bold">转盘自适应约束提醒：</span>
             <span>
-              当前命运盘已分配 <span className="font-mono font-bold">{totalGrid}</span>/100格
+              当前转盘已分配 <span className="font-mono font-bold">{totalGrid}</span>/100格
               {positiveGridTotal > 0 && ` (正向占有: ${positiveGridTotal}格)`}
               {negativeGridTotal > 0 && ` (负向占有: ${negativeGridTotal}格)`}。
             </span>
@@ -458,7 +471,7 @@ export default function EventList({
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3.5 gap-2">
                 <div>
                   <h4 className="text-sm font-bold text-gray-800">1. 习惯分值仓库 (事件库)</h4>
-                  <p className="text-[10px] text-gray-400 mt-0.5">登记日常习惯因果。事件权重一般无需频繁更改</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">登记日常习惯属性。习惯权重分值一般无需频繁更改</p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
@@ -543,6 +556,20 @@ export default function EventList({
                     }}
                     className="w-full p-2.5 font-mono text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 placeholder-slate-400"
                   />
+
+                  {/* Clear all existing events checkbox option */}
+                  <div className="mt-2 flex items-center gap-2 select-none">
+                    <input
+                      type="checkbox"
+                      id="clear-existing-checkbox"
+                      checked={clearExistingOnImport}
+                      onChange={(e) => setClearExistingOnImport(e.target.checked)}
+                      className="w-3.5 h-3.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                    />
+                    <label htmlFor="clear-existing-checkbox" className="text-[10px] text-slate-600 font-bold cursor-pointer flex items-center gap-1">
+                      ⚠️ <b>清除全部现有事件</b> (以此导入完全覆写事件库)
+                    </label>
+                  </div>
 
                   {batchImportError && (
                     <div className="mt-1.5 text-[10px] text-rose-600 font-bold">
@@ -684,7 +711,7 @@ export default function EventList({
                             </button>
                             
                             <button
-                              onClick={() => handleDeleteFromRegistry(item.id)}
+                              onClick={() => handleDeleteFromRegistry(item.id, item.name)}
                               className="p-1 text-slate-400 hover:text-rose-600 rounded transition-all cursor-pointer"
                               title="从库中彻底删除"
                             >
@@ -746,14 +773,14 @@ export default function EventList({
                 </div>
               </div>
 
-              {/* Icon & Color Selector inside the registry form */}
+              {/* Icon Selection & Preview - auto color generation based on weight */}
               <div className="bg-slate-50 p-2.5 border border-slate-200 rounded-xl space-y-2 text-[10px]">
                 <div className="flex gap-2.5 items-stretch">
                   {/* Selected Icon and Color visual preview */}
                   <div className="flex flex-col items-center justify-center bg-white p-1.5 border border-slate-150 rounded-lg shrink-0 w-12">
                     <div 
                       className="w-7 h-7 rounded-full flex items-center justify-center text-sm shadow-3xs"
-                      style={{ backgroundColor: newColor + '15', border: `1.5px solid ${newColor}` }}
+                      style={{ backgroundColor: calculatedColor + '15', border: `1.5px solid ${calculatedColor}` }}
                     >
                       {newEmoji || '✨'}
                     </div>
@@ -785,28 +812,6 @@ export default function EventList({
                         </button>
                       ))}
                     </div>
-                  </div>
-                </div>
-
-                {/* Colors selection row */}
-                <div>
-                  <div className="font-bold text-slate-500 mb-0.5">点击选择专属主颜色：</div>
-                  <div className="flex gap-1 overflow-x-auto pb-1 bg-white border border-slate-100 rounded px-1 no-scrollbar select-none">
-                    {PALETTE.map((col) => (
-                      <button
-                        key={col}
-                        type="button"
-                        onClick={() => setNewColor(col)}
-                        style={{ backgroundColor: col }}
-                        className={`w-3.5 h-3.5 rounded-full border border-slate-200 cursor-pointer shrink-0 hover:scale-115 transition-transform relative ${newColor === col ? 'ring-2 ring-indigo-500 border-white ring-offset-0 scale-110 shadow-3xs' : ''}`}
-                      >
-                        {newColor === col && (
-                          <div className="absolute inset-0 bg-black/10 rounded-full flex items-center justify-center">
-                            <span className="text-[7px] text-white font-extrabold">✓</span>
-                          </div>
-                        )}
-                      </button>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -870,7 +875,7 @@ export default function EventList({
             <div>
               <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3.5">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-800">2. 当次命运转盘</h4>
+                  <h4 className="text-sm font-bold text-gray-800">2. 当期习惯转盘</h4>
                   <p className="text-[10px] text-gray-400 mt-0.5">调配每种行为发生占格，以分拨概率</p>
                 </div>
                 {isTotal100 ? (
@@ -884,14 +889,14 @@ export default function EventList({
                 )}
               </div>
 
-              {/* Dynamic Expectation Display Panel inside 当次命运转盘 config */}
+              {/* Dynamic Expectation Display Panel inside 当期习惯转盘 config */}
               <div className="mb-3.5 p-3.5 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-xl">
                     <Compass className="w-4 h-4 text-indigo-600" />
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wide">今日命运并轨期望</span>
+                    <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wide">今日习惯概率期望</span>
                     <span className="text-[9px] text-slate-500 font-sans">100格占格结算的期望平均分</span>
                   </div>
                 </div>
@@ -931,7 +936,7 @@ export default function EventList({
                   <Sparkles className="w-6 h-6 text-slate-300 animate-pulse" />
                   <span className="text-xs font-bold text-slate-600">把左侧习惯拖进此框</span>
                   <p className="text-[9px] text-slate-400 max-w-[240px] leading-relaxed">
-                    选择您经历过的或准备触发的行为丢入，调整因果占格的比例。
+                    将您需要调节的习惯拖入此处，调整其在转盘上的占格比例。
                   </p>
                 </div>
               ) : (
@@ -1034,7 +1039,7 @@ export default function EventList({
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <h5 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
                 <Edit2 className="w-5.5 h-5.5 text-indigo-650 shrink-0" />
-                <span>🔧 编辑习惯库因果属性</span>
+                <span>🔧 编辑习惯库项目与名称</span>
               </h5>
               <button
                 type="button"
@@ -1103,31 +1108,16 @@ export default function EventList({
                 <p className="text-[9px] text-slate-400 mt-2">支持在左侧输入框内直接输入或粘贴来自您设备的任意自定义 Emoji 符号</p>
               </div>
 
-              {/* 3. Modify Visual Colors */}
+              {/* 3. Automatic Color Indicator */}
               <div className="bg-slate-50/50 p-4 border border-slate-150 rounded-2xl">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-[11px] font-bold text-slate-400 font-mono uppercase tracking-wider">标志主颜色：</label>
-                  <span className="text-[9px] text-indigo-500 font-bold font-mono">共支持 24 种格盘渐变色彩</span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] font-bold text-slate-400 font-mono uppercase tracking-wider">专属颜色（根据权重自动生成）：</label>
                 </div>
-                <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-3xs">
-                  <div className="grid grid-cols-8 gap-2.5">
-                    {PALETTE.map((col) => (
-                      <button
-                        key={col}
-                        type="button"
-                        onClick={() => setEditColor(col)}
-                        style={{ backgroundColor: col }}
-                        className={`w-full aspect-square rounded-full border-2 hover:opacity-90 transition-all cursor-pointer relative ${
-                          editColor === col ? 'border-amber-400 ring-2 ring-indigo-500 shadow-xs scale-105' : 'border-white'
-                        }`}
-                      >
-                        {editColor === col && (
-                          <div className="absolute inset-0 bg-black/10 rounded-full flex items-center justify-center">
-                            <Check className="w-3.5 h-3.5 text-white" />
-                          </div>
-                        )}
-                      </button>
-                    ))}
+                <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center gap-3 shadow-3xs">
+                  <div className="w-8 h-8 rounded-full border border-slate-300 shadow-3xs shrink-0" style={{ backgroundColor: editColor }} />
+                  <div>
+                    <p className="text-xs font-bold text-slate-755">自动派色：{editColor}</p>
+                    <p className="text-[9px] text-slate-400 mt-0.5">每项习惯的分格颜色将根据其当前的习惯分值权重进行自适应色彩渐变生成，无需手动配置。</p>
                   </div>
                 </div>
               </div>
@@ -1146,7 +1136,7 @@ export default function EventList({
                   style={{ backgroundColor: '#4f46e5', color: '#ffffff' }}
                   className="flex-1 py-3 px-4 hover:opacity-95 text-white font-bold rounded-2xl text-xs transition-opacity cursor-pointer shadow-md font-sans"
                 >
-                  保存并同步因果项
+                  保存并同步习惯内容
                 </button>
               </div>
             </form>
